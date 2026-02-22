@@ -1,0 +1,188 @@
+╔════════════════════════════════════════════════════════════════╗
+║     PROMPTPAY PAYMENT SYSTEM - QUICK START GUIDE                ║
+╚════════════════════════════════════════════════════════════════╝
+
+STATUS: ✅ All files deployed. Ready to start services.
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 START SERVICES (CHOOSE ONE):
+
+Option A - Manual SSH (Recommended)
+────────────────────────────────────────────────────────────────
+1. Open terminal
+2. Run: ssh root@150.95.84.201
+3. At VPS prompt, run:
+
+   sudo pkill -9 postgres
+   sleep 2
+   sudo systemctl restart docker
+   cd /opt/promptpay-system
+   docker-compose down -v
+   docker-compose up -d
+   sleep 5
+   docker ps
+
+Wait for "Up" status on all 3 containers
+
+
+Option B - Automated Script
+────────────────────────────────────────────────────────────────
+From your local machine:
+
+   chmod +x /workspaces/slip/complete-vps-recovery.sh
+   ./complete-vps-recovery.sh
+
+(You'll be prompted for password: Laline1812@)
+
+═══════════════════════════════════════════════════════════════════
+
+✅ VERIFY SERVICES ARE RUNNING:
+
+Expected Container Status:
+   slip_api         → Up X seconds (port 8000)
+   slip_postgres    → Up X seconds (port 5432)
+   slip_pgadmin     → Up X seconds (port 5050)
+
+All three should show "Up" status.
+
+═══════════════════════════════════════════════════════════════════
+
+🌐 ACCESS THE SYSTEM:
+
+Once services are "Up":
+
+   API Documentation:     http://150.95.84.201:8000/docs
+   Database Manager:      http://150.95.84.201:5050
+                         (admin@example.com / admin)
+
+═══════════════════════════════════════════════════════════════════
+
+🧪 TEST AN ENDPOINT:
+
+Generate QR Code:
+   curl -X POST http://150.95.84.201:8000/api/payment/generate-qr \
+     -H "Content-Type: application/json" \
+     -d '{"amount": 100}'
+
+Expected: base64-encoded QR image with PromptPay data
+
+═══════════════════════════════════════════════════════════════════
+
+📋 WHAT'S DEPLOYED:
+
+/opt/promptpay-system/ contains:
+   ✅ main.py              (FastAPI app with 5 REST endpoints)
+   ✅ models.py            (Database models)
+   ✅ qr_reader.py         (QR processing + OCR)
+   ✅ payment_service.py   (PromptPay QR generation)
+   ✅ schemas.py           (Request/response validation)
+   ✅ database.py          (PostgreSQL connection)
+   ✅ docker-compose.yml   (Service orchestration)
+   ✅ Dockerfile           (Production image)
+   ✅ requirements.txt     (Python dependencies)
+
+═══════════════════════════════════════════════════════════════════
+
+❌ COMMON ISSUES & FIXES:
+
+Issue: "Port 5432 already in use"
+Fix:   sudo pkill -9 postgres
+       sudo systemctl restart docker
+       docker-compose up -d
+
+Issue: "Cannot reach API (http://150.95.84.201:8000)"
+Fix:   1. Check containers: docker ps
+       2. Check logs: docker-compose logs slip_api
+       3. Restart: docker-compose restart
+
+Issue: "Database not responding"
+Fix:   docker-compose down -v
+       docker-compose up -d
+       sleep 10
+       (DB takes 5-10s to initialize)
+
+═══════════════════════════════════════════════════════════════════
+
+📊 5 API ENDPOINTS:
+
+1. POST /api/payment/generate-qr           (Generate QR code)
+2. POST /api/payment/upload-slip          (Verify payment slip)
+3. POST /api/webhook/linebk               (Optional webhook)
+4. GET  /api/admin/verifications          (View all verifications)
+5. POST /api/admin/verify-payment         (Manual approve/reject)
+
+═══════════════════════════════════════════════════════════════════
+
+🔍 MONITORING:
+
+View real-time logs:
+   docker-compose logs -f slip_api
+
+View database:
+   docker-compose exec slip_postgres psql -U slip_user -d slip_db
+
+Restart all services:
+   docker-compose restart
+
+Stop all services:
+   docker-compose down
+
+═══════════════════════════════════════════════════════════════════
+
+📁 COMPLETE FILE LIST IN /opt/promptpay-system/:
+
+Python Code Files:
+   • main.py (401 lines)
+   • models.py (53 lines)
+   • qr_reader.py (170+ lines)
+   • payment_service.py (144 lines)
+   • schemas.py (84+ lines)
+   • database.py (21 lines)
+   • config.py (15 lines)
+
+Docker & Infrastructure:
+   • docker-compose.yml
+   • Dockerfile
+   • requirements.txt
+   • .env (environment variables)
+
+Documentation (in /workspaces/slip/):
+   • START_SERVICES_NOW.md (this guide)
+   • DEPLOYMENT_STATUS.md (detailed info)
+   • complete-vps-recovery.sh (auto-recovery script)
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 RECOMMENDED NEXT STEPS:
+
+1. ✅ Run one of the startup commands above
+2. ✅ Wait 10 seconds for full initialization
+3. ✅ Check all containers are "Up": docker ps
+4. ✅ Visit http://150.95.84.201:8000/docs in browser
+5. ✅ Test an endpoint using Swagger UI
+6. ✅ Check database at http://150.95.84.201:5050
+7. ✅ Review logs: docker-compose logs --tail=50
+
+═══════════════════════════════════════════════════════════════════
+
+💡 TIPS:
+
+• All commands should be run as 'root' on the VPS
+• Use 'docker ps' to verify container status (should show "Up")
+• Use 'docker logs <container>' to debug any issues
+• Database takes 5-10 seconds to initialize after startup
+• Swagger UI at /docs is the best way to test endpoints
+
+═══════════════════════════════════════════════════════════════════
+
+Questions? Check these detailed docs:
+   • START_SERVICES_NOW.md (this file guide)
+   • DEPLOYMENT_STATUS.md (troubleshooting)
+   • API_REFERENCE.md (endpoint documentation)
+   • ARCHITECTURE.md (system design)
+
+═══════════════════════════════════════════════════════════════════
+Last Updated: 2026-02-22 | Status: Ready to Start | Version: 1.0
+═══════════════════════════════════════════════════════════════════
+

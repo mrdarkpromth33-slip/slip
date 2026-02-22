@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: slip_postgres
+    environment:
+      POSTGRES_USER: slip_user
+      POSTGRES_PASSWORD: slip_password
+      POSTGRES_DB: slip_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slip_user -d slip_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - slip_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: slip_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - slip_network
+
+  api:
+    build: .
+    container_name: slip_api
+    environment:
+      DATABASE_URL: postgresql://slip_user:slip_password@postgres:5432/slip_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - slip_network
+
+volumes:
+  postgres_data:
+
+networks:
+  slip_network:
+    driver: bridge
